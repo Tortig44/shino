@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ШиноPro — Шиномонтаж с онлайн-записью</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  :root {
+    --bg: #0a0714;
+    --bg-2: #100a1f;
+    --card: #171029;
+    --border: #2a1f48;
+    --accent: #8b5cf6;
+    --accent-2: #a78bfa;
+    --accent-glow: rgba(139, 92, 246, 0.22);
+    --text: #ece9f5;
+    --muted: #8b849e;
+    --success: #22c55e;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 900px 600px at 15% -10%, rgba(139,92,246,0.12), transparent 60%),
+      radial-gradient(ellipse 800px 600px at 100% 100%, rgba(139,92,246,0.08), transparent 60%);
+  }
+
+  /* ============ HEADER + TABS ============ */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,7,20,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 21px; font-weight: 800; letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+  .logo svg { width: 28px; height: 28px; color: var(--accent); }
+  .logo span { color: var(--accent); }
+
+  .tabs {
+    display: flex; gap: 6px; list-style: none;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: transparent; color: var(--muted); border: none;
+    padding: 10px 18px; border-radius: 9px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: 0.2s; white-space: nowrap;
+    font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(139,92,246,0.08); }
+  .tab-btn.active {
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+
+  /* ============ TAB PANELS ============ */
+  main {
+    padding-top: 76px;
+    min-height: 100vh;
+  }
+  .tab-panel {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    animation: fadeIn 0.35s ease;
+  }
+  .tab-panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ TYPOGRAPHY ============ */
+  .section-title { text-align: center; margin-bottom: 44px; }
+  .section-title h2 {
+    font-size: clamp(26px, 4vw, 38px); font-weight: 800;
+    letter-spacing: -0.5px; margin-bottom: 12px;
+  }
+  .section-title h2 span { color: var(--accent); }
+  .section-title p { color: var(--muted); font-size: 16px; }
+
+  /* ============ HOME / HERO ============ */
+  .hero-grid {
+    display: grid; grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px; align-items: center;
+  }
+  .hero-tag {
+    display: inline-block; padding: 6px 14px; border-radius: 30px;
+    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3);
+    color: var(--accent-2); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.5px; margin-bottom: 20px;
+  }
+  .hero-text h1 {
+    font-size: clamp(32px, 4.5vw, 54px); font-weight: 800;
+    letter-spacing: -1px; line-height: 1.08; margin-bottom: 20px;
+  }
+  .hero-text h1 span { color: var(--accent); }
+  .hero-text > p {
+    font-size: 17px; color: var(--muted); max-width: 540px; margin-bottom: 32px;
+  }
+  .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none;
+    padding: 14px 30px; border-radius: 10px; font-weight: 600;
+    font-size: 16px; cursor: pointer; transition: 0.2s; font-family: inherit;
+    box-shadow: 0 8px 24px var(--accent-glow);
+  }
+  .btn-primary:hover { background: var(--accent-2); transform: translateY(-2px); }
+  .btn-secondary {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+    padding: 14px 30px; border-radius: 10px; font-weight: 600;
+    font-size: 16px; cursor: pointer; transition: 0.2s; font-family: inherit;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-visual {
+    position: relative;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .hero-visual::after {
+    content: ''; position: absolute; inset: 5%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+    filter: blur(50px); z-index: -1;
+  }
+  .hero-tire {
+    width: 100%; max-width: 380px;
+    animation: spin 70s linear infinite;
+    filter: drop-shadow(0 20px 60px var(--accent-glow));
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 20px; margin-top: 30px;
+    padding-top: 40px; border-top: 1px solid var(--border);
+  }
+  .stat h3 { font-size: 30px; color: var(--accent); font-weight: 800; }
+  .stat p { color: var(--muted); font-size: 13px; }
+
+  /* ============ SERVICES ============ */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .service {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 26px;
+    transition: 0.25s; position: relative; overflow: hidden;
+  }
+  .service::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: 0.3s;
+  }
+  .service:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .service:hover::before { opacity: 1; }
+  .service-icon {
+    width: 44px; height: 44px; color: var(--accent);
+    margin-bottom: 16px; stroke-width: 1.6;
+  }
+  .service h3 { font-size: 18px; margin-bottom: 8px; }
+  .service p { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+  .service .price { color: var(--accent); font-weight: 700; font-size: 19px; }
+
+  /* ============ GALLERY ============ */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+  }
+  .gallery-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; transition: 0.25s;
+  }
+  .gallery-item:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .gallery-visual {
+    aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #100a1f 0%, #1a1033 100%);
+    position: relative; overflow: hidden;
+  }
+  .gallery-visual::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at center, var(--accent-glow), transparent 70%);
+    opacity: 0.5; pointer-events: none;
+  }
+  .gallery-visual svg { width: 65%; height: 65%; max-width: 200px; position: relative; z-index: 1; }
+  .gallery-caption {
+    padding: 18px 20px; border-top: 1px solid var(--border);
+  }
+  .gallery-caption h4 { font-size: 16px; margin-bottom: 4px; }
+  .gallery-caption p { color: var(--muted); font-size: 13px; }
+
+  /* ============ BOOKING ============ */
+  .booking-wrap {
+    max-width: 720px; margin: 0 auto;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 40px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group label {
+    font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 13px 15px; border-radius: 9px; font-size: 15px;
+    transition: 0.2s; font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .form-group.full { grid-column: 1 / -1; }
+  .submit-btn {
+    width: 100%; background: var(--accent); color: #fff; border: none;
+    padding: 16px; border-radius: 10px; font-weight: 700; font-size: 16px;
+    cursor: pointer; transition: 0.2s; margin-top: 10px; font-family: inherit;
+    box-shadow: 0 8px 24px var(--accent-glow);
+  }
+  .submit-btn:hover { background: var(--accent-2); }
+  .success-msg {
+    display: none; background: rgba(34,197,94,0.1); border: 1px solid var(--success);
+    color: var(--success); padding: 18px; border-radius: 12px;
+    text-align: center; margin-top: 20px; font-weight: 600;
+  }
+  .success-msg.show { display: block; }
+
+  /* ============ CONTACTS ============ */
+  .contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px; margin-bottom: 30px;
+  }
+  .contact-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 26px; text-align: center; transition: 0.25s;
+  }
+  .contact-card:hover { border-color: var(--accent); }
+  .contact-icon {
+    width: 38px; height: 38px; color: var(--accent);
+    margin: 0 auto 12px; stroke-width: 1.6; display: block;
+  }
+  .contact-card h3 {
+    font-size: 12px; color: var(--muted); margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 1.2px;
+  }
+  .contact-card p { font-size: 16px; font-weight: 600; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px; margin-top: 30px;
+  }
+  .feature { text-align: center; padding: 20px; }
+  .feature-icon-wrap {
+    width: 60px; height: 60px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.16), rgba(139,92,246,0.04));
+    border: 1px solid rgba(139,92,246,0.25);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .feature-icon-wrap svg { width: 28px; height: 28px; color: var(--accent); stroke-width: 1.7; }
+  .feature h3 { font-size: 15px; margin-bottom: 6px; }
+  .feature p { color: var(--muted); font-size: 13px; }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 26px 24px;
+    text-align: center; color: var(--muted); font-size: 13px;
+  }
+  footer span { color: var(--accent); }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+    .hero-visual { order: -1; }
+    .hero-tire { max-width: 240px; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { padding: 12px 16px; gap: 12px; }
+    .logo { font-size: 18px; }
+    .logo svg { width: 22px; height: 22px; }
+    .tab-btn { padding: 9px 14px; font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .booking-wrap { padding: 24px 20px; }
+    .tab-panel { padding: 40px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="3.5"/>
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>
+      </svg>
+      Шино<span>Pro</span>
+    </div>
+    <ul class="tabs">
+      <li><button class="tab-btn active" data-tab="home">Главная</button></li>
+      <li><button class="tab-btn" data-tab="services">Услуги</button></li>
+      <li><button class="tab-btn" data-tab="gallery">Галерея</button></li>
+      <li><button class="tab-btn" data-tab="booking">Записаться</button></li>
+      <li><button class="tab-btn" data-tab="contacts">Контакты</button></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="tab-panel active" id="home">
+  <div class="hero-grid">
+    <div class="hero-text">
+      <span class="hero-tag">● Шиномонтаж нового уровня</span>
+      <h1>Колёса — <span>за 30 минут</span><br>без очередей</h1>
+      <p>Профессиональный шиномонтаж, балансировка и ремонт колёс. Забронируйте удобное время онлайн — приезжайте к назначенному часу.</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" data-goto="booking">Записаться</button>
+        <button class="btn-secondary" data-goto="services">Все услуги</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-tire" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="tireGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="210" cy="210" r="205" fill="url(#tireGlow)"/>
+        <circle cx="210" cy="210" r="195" fill="#0a0714" stroke="#2a1f48" stroke-width="2"/>
+        <circle cx="210" cy="210" r="170" fill="none" stroke="#2f2350" stroke-width="32" stroke-dasharray="10 14"/>
+        <circle cx="210" cy="210" r="186" fill="none" stroke="#100a1f" stroke-width="3"/>
+        <circle cx="210" cy="210" r="154" fill="none" stroke="#100a1f" stroke-width="3"/>
+        <circle cx="210" cy="210" r="140" fill="#171029" stroke="#3d2c68" stroke-width="3"/>
+        <circle cx="210" cy="210" r="130" fill="none" stroke="#2a1f48" stroke-width="1.5"/>
+        <g stroke="#3d2c68" stroke-width="16" stroke-linecap="round">
+          <line x1="210" y1="210" x2="210" y2="100" transform="rotate(0 210 210)"/>
+          <line x1="210" y1="210" x2="210" y2="100" transform="rotate(72 210 210)"/>
+          <line x1="210" y1="210" x2="210" y2="100" transform="rotate(144 210 210)"/>
+          <line x1="210" y1="210" x2="210" y2="100" transform="rotate(216 210 210)"/>
+          <line x1="210" y1="210" x2="210" y2="100" transform="rotate(288 210 210)"/>
+        </g>
+        <circle cx="210" cy="210" r="38" fill="#2a1f48" stroke="#3d2c68" stroke-width="3"/>
+        <circle cx="210" cy="210" r="14" fill="#8b5cf6"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><h3>12+</h3><p>лет на рынке</p></div>
+    <div class="stat"><h3>30 мин</h3><p>среднее время</p></div>
+    <div class="stat"><h3>4.9★</h3><p>рейтинг клиентов</p></div>
+    <div class="stat"><h3>25 000+</h3><p>довольных авто</p></div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="tab-panel" id="services">
+  <div class="section-title">
+    <h2>Услуги и <span>цены</span></h2>
+    <p>Честные цены, профессиональное оборудование, опытные мастера</p>
+  </div>
+
+  <div class="services-grid">
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/>
+        <path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.9 5.9l1.8 1.8M16.3 16.3l1.8 1.8M18.1 5.9l-1.8 1.8M7.7 16.3l-1.8 1.8"/>
+      </svg>
+      <h3>Шиномонтаж R13–R16</h3>
+      <p>Снятие, монтаж, балансировка. Комплект из 4 колёс.</p>
+      <div class="price">от 2000 ₽</div>
+    </div>
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 14l1.7-5.2A2 2 0 0 1 6.6 7.5h10.8a2 2 0 0 1 1.9 1.3L21 14v4h-2.5"/>
+        <path d="M5.5 18H3v-4M6 14h12"/>
+        <circle cx="7.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/>
+        <path d="M9.3 18h5.4"/>
+      </svg>
+      <h3>Шиномонтаж R17–R20</h3>
+      <p>Для кроссоверов и внедорожников. Аккуратно и быстро.</p>
+      <div class="price">от 2800 ₽</div>
+    </div>
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <rect x="10.8" y="2" width="2.4" height="4" rx="0.6"/>
+        <rect x="10.8" y="18" width="2.4" height="4" rx="0.6"/>
+        <circle cx="12" cy="12" r="2"/>
+        <path d="M6.5 6.5l1.5 1.5M16 16l1.5 1.5M17.5 6.5L16 8M8 16l-1.5 1.5"/>
+      </svg>
+      <h3>Балансировка</h3>
+      <p>Точная балансировка на современном стенде.</p>
+      <div class="price">от 300 ₽</div>
+    </div>
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.1-.3-.3-2.1 2.5-2.5z"/>
+        <path d="M15.5 15.5l3 3"/>
+      </svg>
+      <h3>Ремонт проколов</h3>
+      <p>Жгут, грибок, вулканизация. Работаем с любыми повреждениями.</p>
+      <div class="price">от 400 ₽</div>
+    </div>
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8l9-4 9 4-9 4-9-4z"/>
+        <path d="M3 8v9l9 4 9-4V8M12 12v9M7.5 6.2l9 4"/>
+      </svg>
+      <h3>Сезонное хранение</h3>
+      <p>Хранение шин на складе с соблюдением всех условий.</p>
+      <div class="price">от 2000 ₽/сезон</div>
+    </div>
+
+    <div class="service">
+      <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="11" height="9" rx="1"/>
+        <path d="M13 10h4l4 3.5V16h-8"/>
+        <circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>
+        <path d="M8 16h6"/>
+      </svg>
+      <h3>Выездной шиномонтаж</h3>
+      <p>Приедем к вам — домой или на работу.</p>
+      <div class="price">от 3500 ₽</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section class="tab-panel" id="gallery">
+  <div class="section-title">
+    <h2>Что мы <span>делаем</span></h2>
+    <p>Визуально о работе: оборудование, услуги и процессы сервиса</p>
+  </div>
+
+  <div class="gallery-grid">
+
+    <!-- 1. Машина -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 460 200" fill="none" stroke="#8b5cf6" stroke-linejoin="round">
+          <path d="M40 140 L40 100 Q40 90 50 88 L100 80 L140 45 Q150 38 165 38 L290 38 Q310 38 320 48 L360 82 L410 92 Q420 94 420 105 L420 140 Z" fill="#171029" stroke-width="3"/>
+          <path d="M150 55 L175 45 L210 45 L210 82 L140 82 Z" fill="#0a0714" stroke-width="2"/>
+          <path d="M225 45 L285 45 Q300 45 310 55 L340 80 L225 80 Z" fill="#0a0714" stroke-width="2"/>
+          <circle cx="115" cy="145" r="30" fill="#0a0714" stroke-width="3"/>
+          <circle cx="115" cy="145" r="12" stroke-width="2"/>
+          <circle cx="340" cy="145" r="30" fill="#0a0714" stroke-width="3"/>
+          <circle cx="340" cy="145" r="12" stroke-width="2"/>
+          <line x1="40" y1="105" x2="420" y2="105" stroke-width="1.5" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Обслуживание авто</h4>
+        <p>Легковые и кроссоверы, любые диски</p>
+      </div>
+    </div>
+
+    <!-- 2. Балансировочный стенд -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 250 250" fill="none" stroke="#8b5cf6" stroke-linejoin="round">
+          <rect x="60" y="205" width="130" height="18" rx="4" fill="#171029" stroke-width="3"/>
+          <rect x="115" y="120" width="20" height="85" fill="#171029" stroke-width="3"/>
+          <circle cx="125" cy="100" r="70" fill="#171029" stroke-width="3"/>
+          <circle cx="125" cy="100" r="50" stroke-width="2"/>
+          <g stroke-width="2">
+            <line x1="125" y1="50" x2="125" y2="150"/>
+            <line x1="75" y1="100" x2="175" y2="100"/>
+          </g>
+          <circle cx="125" cy="100" r="14" fill="#8b5cf6"/>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Балансировочный стенд</h4>
+        <p>Точность до 1 грамма</p>
+      </div>
+    </div>
+
+    <!-- 3. Стопка шин -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 300 220" fill="none" stroke="#8b5cf6" stroke-linejoin="round">
+          <ellipse cx="150" cy="60" rx="100" ry="20" fill="#171029" stroke-width="3"/>
+          <path d="M50 60 L50 80 Q50 100 150 100 Q250 100 250 80 L250 60" stroke-width="3"/>
+          <ellipse cx="150" cy="100" rx="100" ry="20" stroke-width="3"/>
+          <path d="M50 100 L50 120 Q50 140 150 140 Q250 140 250 120 L250 100" stroke-width="3"/>
+          <ellipse cx="150" cy="140" rx="100" ry="20" stroke-width="3"/>
+          <path d="M50 140 L50 160 Q50 180 150 180 Q250 180 250 160 L250 140" stroke-width="3"/>
+          <ellipse cx="150" cy="180" rx="100" ry="20" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Сезонное хранение</h4>
+        <p>Отапливаемый склад, маркировка каждого комплекта</p>
+      </div>
+    </div>
+
+    <!-- 4. Манометр -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 220 220" fill="none" stroke="#8b5cf6">
+          <circle cx="110" cy="110" r="82" fill="#171029" stroke-width="3"/>
+          <circle cx="110" cy="110" r="64" stroke-width="2" opacity="0.5"/>
+          <g stroke-width="3" stroke-linecap="round">
+            <line x1="110" y1="32" x2="110" y2="50"/>
+            <line x1="110" y1="188" x2="110" y2="170"/>
+            <line x1="32" y1="110" x2="50" y2="110"/>
+            <line x1="188" y1="110" x2="170" y2="110"/>
+            <line x1="55" y1="55" x2="68" y2="68"/>
+            <line x1="165" y1="165" x2="152" y2="152"/>
+            <line x1="165" y1="55" x2="152" y2="68"/>
+            <line x1="55" y1="165" x2="68" y2="152"/>
+          </g>
+          <line x1="110" y1="110" x2="155" y2="65" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="110" cy="110" r="9" fill="#8b5cf6"/>
+          <text x="110" y="150" text-anchor="middle" fill="#a78bfa" stroke="none" font-size="15" font-weight="700" font-family="sans-serif">2.4 BAR</text>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Проверка давления</h4>
+        <p>Бесплатно при каждом визите</p>
+      </div>
+    </div>
+
+    <!-- 5. Инструмент (ключ + гайка) -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 220 220" fill="none" stroke="#8b5cf6" stroke-linejoin="round">
+          <!-- Гайка -->
+          <polygon points="110,40 165,72 165,136 110,168 55,136 55,72" fill="#171029" stroke-width="3"/>
+          <circle cx="110" cy="104" r="22" fill="#0a0714" stroke-width="3"/>
+          <!-- Ключ -->
+          <path d="M20 200 L60 160 L85 185 L45 225 Z" fill="#8b5cf6" stroke="#8b5cf6" stroke-width="2"/>
+          <path d="M60 160 L75 145 M45 225 L30 240" stroke-width="2" opacity="0"/>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Инструмент мастера</h4>
+        <p>Профессиональное оборудование и динамометрические ключи</p>
+      </div>
+    </div>
+
+    <!-- 6. Знак сервиса / геометрия -->
+    <div class="gallery-item">
+      <div class="gallery-visual">
+        <svg viewBox="0 0 220 220" fill="none" stroke="#8b5cf6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="110" cy="110" r="82" fill="#171029" stroke-width="3"/>
+          <circle cx="110" cy="110" r="60" stroke-width="2" opacity="0.4"/>
+          <path d="M110 40 L130 90 L180 110 L130 130 L110 180 L90 130 L40 110 L90 90 Z" fill="rgba(139,92,246,0.15)" stroke-width="3"/>
+          <circle cx="110" cy="110" r="14" fill="#8b5cf6"/>
+        </svg>
+      </div>
+      <div class="gallery-caption">
+        <h4>Точная геометрия</h4>
+        <p>Проверка развал-схождения и правильная установка</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= BOOKING ================= -->
+<section class="tab-panel" id="booking">
+  <div class="section-title">
+    <h2>Онлайн-<span>запись</span></h2>
+    <p>Выберите удобную дату и время — мы подтвердим запись по телефону</p>
+  </div>
+  <div class="booking-wrap">
+    <form id="bookingForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ваше имя</label>
+          <input type="text" name="name" placeholder="Иван" required>
+        </div>
+        <div class="form-group">
+          <label>Телефон</label>
+          <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Дата</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label>Время</label>
+          <select name="time" required>
+            <option value="">Выберите время</option>
+            <option>09:00</option><option>10:00</option><option>11:00</option>
+            <option>12:00</option><option>13:00</option><option>14:00</option>
+            <option>15:00</option><option>16:00</option><option>17:00</option>
+            <option>18:00</option><option>19:00</option><option>20:00</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Услуга</label>
+          <select name="service" required>
+            <option value="">Выберите услугу</option>
+            <option>Шиномонтаж R13–R16</option>
+            <option>Шиномонтаж R17–R20</option>
+            <option>Балансировка</option>
+            <option>Ремонт проколов</option>
+            <option>Сезонное хранение</option>
+            <option>Выездной шиномонтаж</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Марка авто / размер шин</label>
+          <input type="text" name="car" placeholder="Toyota Camry, 215/60 R16">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Комментарий (необязательно)</label>
+          <textarea name="comment" rows="3" placeholder="Дополнительные пожелания..."></textarea>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">Забронировать время</button>
+      <div class="success-msg" id="successMsg">
+        ✅ Спасибо! Заявка принята. Мы позвоним для подтверждения.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ================= CONTACTS ================= -->
+<section class="tab-panel" id="contacts">
+  <div class="section-title">
+    <h2>Контакты</h2>
+    <p>Ждём вас ежедневно с 9:00 до 21:00</p>
+  </div>
+
+  <div class="contacts-grid">
+    <div class="contact-card">
+      <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"/>
+        <circle cx="12" cy="10" r="2.6"/>
+      </svg>
+      <h3>Адрес</h3>
+      <p>г. Москва, ул. Автомобильная, 15</p>
+    </div>
+    <div class="contact-card">
+      <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16.9v2.5a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 1.1 3.6 2 2 0 0 1 3.1 1.4h2.5a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L6.7 8.9a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.7 2z"/>
+      </svg>
+      <h3>Телефон</h3>
+      <p>+7 (999) 123-45-67</p>
+    </div>
+    <div class="contact-card">
+      <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/>
+        <path d="M3 7l9 6 9-6"/>
+      </svg>
+      <h3>Email</h3>
+      <p>info@shinopro.ru</p>
+    </div>
+    <div class="contact-card">
+      <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v5l3.5 2"/>
+      </svg>
+      <h3>Режим работы</h3>
+      <p>Ежедневно 9:00 – 21:00</p>
+    </div>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>
+        </svg>
+      </div>
+      <h3>Без очередей</h3>
+      <p>Приезжаете точно к своему времени</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l8 3v5c0 4.5-3.2 8.5-8 10-4.8-1.5-8-5.5-8-10V6l8-3z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <h3>Гарантия 6 мес.</h3>
+      <p>На все виды работ</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2.5"/>
+          <path d="M2 10h20M6 15h4"/>
+        </svg>
+      </div>
+      <h3>Любая оплата</h3>
+      <p>Наличные, карта, СБП, безнал</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14a1.7 1.7 0 0 0-1.7-1H1a2 2 0 1 1 0-4h.2A1.7 1.7 0 0 0 3 7.9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 8 3.5 1.7 1.7 0 0 0 9 1.8V1a2 2 0 1 1 4 0v.2A1.7 1.7 0 0 0 14 2.9a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 19.4 8c.2.6.8 1 1.4 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z"/>
+        </svg>
+      </div>
+      <h3>Современные стенды</h3>
+      <p>Не повреждаем диски и шины</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  © 2025 Шино<span>Pro</span>. Все права защищены. Онлайн-запись на шиномонтаж.
+</footer>
+
+<script>
+  // ============ TABS ============
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  function activateTab(name) {
+    tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    panels.forEach(p => p.classList.toggle('active', p.id === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  });
+
+  // Кнопки внутри контента, ведущие на другие вкладки
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => activateTab(el.dataset.goto));
+  });
+
+  // ============ BOOKING FORM ============
+  const form = document.getElementById('bookingForm');
+  const successMsg = document.getElementById('successMsg');
+
+  const dateInput = form.querySelector('input[name="date"]');
+  dateInput.min = new Date().toISOString().split('T')[0];
+
+  const phoneInput = form.querySelector('input[name="phone"]');
+  phoneInput.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+    if (v.startsWith('8')) v = '7' + v.slice(1);
+    if (!v.startsWith('7')) v = '7' + v;
+    let out = '+7';
+    if (v.length > 1) out += ' (' + v.slice(1, 4);
+    if (v.length >= 5) out += ') ' + v.slice(4, 7);
+    if (v.length >= 8) out += '-' + v.slice(7, 9);
+    if (v.length >= 10) out += '-' + v.slice(9, 11);
+    e.target.value = out;
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    bookings.push({ ...data, createdAt: new Date().toISOString() });
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    successMsg.classList.add('show');
+    form.reset();
+    setTimeout(() => successMsg.classList.remove('show'), 6000);
+  });
+</script>
+
+</body>
+</html>
